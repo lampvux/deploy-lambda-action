@@ -7,7 +7,8 @@
     "format-check": "prettier --check **/*.ts",
     "lint": "eslint **/*.ts",
     "package": "ncc build --source-map --license licenses.txt",
-    "test": "jest"
+    "test": "jest",
+    "pre-commit": "tsc"
   },
   "dependencies": {
     "@actions/core": "1.10.0",
