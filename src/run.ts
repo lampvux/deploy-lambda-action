@@ -9,6 +9,11 @@ import {
   UpdateAliasCommandInput,
   UpdateAliasCommandOutput,
   UpdateFunctionCodeCommand,
+  CreateFunctionCommand,
+  GetFunctionCommand,
+  CreateFunctionCommandOutput,
+  UpdateFunctionCodeCommandOutput,
+  ResourceNotFoundException,
 } from '@aws-sdk/client-lambda'
 import { readFile } from 'fs/promises'
 
@@ -18,6 +23,8 @@ type Inputs = {
   zipPath?: string
   aliasName: string
   aliasDescription: string
+  timeOut?: number
+  memorySize?: number
 }
 
 type Outputs = {
@@ -28,7 +35,12 @@ type Outputs = {
 
 export const run = async (inputs: Inputs): Promise<Outputs> => {
   const client = new LambdaClient({})
-  const updatedFunction = await updateFunctionCode(client, inputs)
+  const functionExisted = await checkIfFunctionExists(client, inputs)
+
+  const updatedFunction = functionExisted
+    ? await updateFunctionCode(client, inputs)
+    : await createFunctionCode(client, inputs)
+
   const functionVersion = updatedFunction.Version
   const functionVersionARN = updatedFunction.FunctionArn
   if (functionVersion === undefined) {
@@ -57,7 +69,41 @@ export const run = async (inputs: Inputs): Promise<Outputs> => {
   return { functionVersion, functionVersionARN, functionAliasARN }
 }
 
-const updateFunctionCode = async (client: LambdaClient, inputs: Inputs) => {
+async function checkIfFunctionExists(client: LambdaClient, inputs: Inputs) {
+  try {
+    const params = { FunctionName: inputs.functionName }
+    await client.send(new GetFunctionCommand(params))
+    core.info(`Function ${inputs.functionName} exist`)
+    return true
+  } catch (error) {
+    if (error instanceof ResourceNotFoundException) {
+      console.log(`Function ${inputs.functionName} does not exist`)
+      return false
+    }
+    throw error
+  }
+}
+
+const createFunctionCode = async (client: LambdaClient, inputs: Inputs): Promise<CreateFunctionCommandOutput> => {
+  const params = {
+    FunctionName: inputs.functionName,
+    Code: {
+      ImageUri: inputs.imageURI,
+    },
+    Timeout: inputs.timeOut, // Set the timeout
+    MemorySize: inputs.memorySize, // Set the memory size
+    Role: undefined,
+    // add more attribute here
+  }
+  try {
+    return await client.send(new CreateFunctionCommand(params))
+  } catch (error) {
+    core.info(`Can not create function: ${JSON.stringify(error)}`)
+    throw error
+  }
+}
+
+const updateFunctionCode = async (client: LambdaClient, inputs: Inputs): Promise<UpdateFunctionCodeCommandOutput> => {
   if (inputs.zipPath) {
     core.info(`Updating function ${inputs.functionName} to archive ${inputs.zipPath}`)
     const zipFile = await readFile(inputs.zipPath)
