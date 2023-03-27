@@ -174,8 +174,10 @@ data "aws_iam_policy_document" "github_actions_deploy_lambda" {
       "lambda:UpdateFunctionConfiguration",
       "lambda:CreateAlias",
       "lambda:UpdateAlias",
+      "iam:GetRole",
       "iam:CreateRole",
-      "iam:PutRolePolicy"
+      "iam:PutRolePolicy",
+      "iam:PassRole"
 
     ]
     resources = [

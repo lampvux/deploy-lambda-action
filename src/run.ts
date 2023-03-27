@@ -16,7 +16,13 @@ import {
   CreateFunctionCommandInput,
   ResourceNotFoundException,
 } from '@aws-sdk/client-lambda'
-import { IAMClient, CreateRoleCommand, PutRolePolicyCommand } from '@aws-sdk/client-iam'
+import {
+  IAMClient,
+  CreateRoleCommand,
+  PutRolePolicyCommand,
+  GetRoleCommand,
+  NoSuchEntityException,
+} from '@aws-sdk/client-iam'
 
 import { readFile } from 'fs/promises'
 
@@ -87,7 +93,20 @@ async function checkIfFunctionExists(client: LambdaClient, inputs: Inputs) {
     throw error
   }
 }
+const isRoleNameExists = async (roleName: string) => {
+  const iam = new IAMClient({ region: 'us-east-1' }) // Update the region as per your requirement
 
+  try {
+    const role = await iam.send(new GetRoleCommand({ RoleName: roleName }))
+    const roleArn = role?.Role?.Arn
+    return roleArn
+  } catch (err) {
+    if (err instanceof NoSuchEntityException) {
+      return false // Role name doesn't exist
+    }
+    throw err // Throw the error for other issues
+  }
+}
 const createIamRoleLambdaBasic = async (inputs: Inputs) => {
   // Create a new IAM instance
   const iam = new IAMClient({})
@@ -154,7 +173,8 @@ const createFunctionCode = async (client: LambdaClient, inputs: Inputs): Promise
   if (inputs.role) {
     params.Role = inputs.role
   } else {
-    params.Role = await createIamRoleLambdaBasic(inputs)
+    const role = await isRoleNameExists(inputs.functionName)
+    params.Role = role ? role : await createIamRoleLambdaBasic(inputs)
   }
 
   try {
