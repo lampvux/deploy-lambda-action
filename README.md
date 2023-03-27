@@ -168,12 +168,20 @@ data "aws_iam_policy_document" "github_actions_deploy_lambda" {
   statement {
     effect = "Allow"
     actions = [
+      "lambda:GetFunction",
+      "lambda:CreateFunction",
       "lambda:UpdateFunctionCode",
+      "lambda:UpdateFunctionConfiguration",
       "lambda:CreateAlias",
       "lambda:UpdateAlias",
+      "iam:CreateRole",
+      "iam:PutRolePolicy"
+
     ]
     resources = [
       "arn:aws:lambda:REGION:ACCOUNT:function:FUNCTION",
+      "arn:aws:iam::ACCOUNT:role/FUNCTION",
+      "arn:aws:iam::ACCOUNT:policy/FUNCTION-LambdaBasicExecution"
     ]
   }
 }
@@ -190,6 +198,9 @@ data "aws_iam_policy_document" "github_actions_deploy_lambda" {
 | `zip-path` | Path to an archive
 | `alias-name` | Alias name (optional)
 | `alias-description` | Alias description (optional)
+| `timeOut` | Lambda timeout (optional)
+| `memorySize` | Lambda memory size (optional)
+| `role` | Execution role (optional)
 
 Either `image-uri` or `zip-path` must be set.
 

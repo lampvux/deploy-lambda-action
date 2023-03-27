@@ -13,8 +13,11 @@ import {
   GetFunctionCommand,
   CreateFunctionCommandOutput,
   UpdateFunctionCodeCommandOutput,
+  CreateFunctionCommandInput,
   ResourceNotFoundException,
 } from '@aws-sdk/client-lambda'
+import { IAMClient, CreateRoleCommand, PutRolePolicyCommand } from '@aws-sdk/client-iam'
+
 import { readFile } from 'fs/promises'
 
 type Inputs = {
@@ -25,6 +28,7 @@ type Inputs = {
   aliasDescription: string
   timeOut?: number
   memorySize?: number
+  role?: string
 }
 
 type Outputs = {
@@ -84,8 +88,60 @@ async function checkIfFunctionExists(client: LambdaClient, inputs: Inputs) {
   }
 }
 
+const createIamRoleLambdaBasic = async (inputs: Inputs) => {
+  // Create a new IAM instance
+  const iam = new IAMClient({})
+
+  // Define the role name
+  const roleName = `${inputs.functionName}`
+
+  // Define the trust policy document
+  const trustPolicy = {
+    Version: '2012-10-17',
+    Statement: [
+      {
+        Effect: 'Allow',
+        Principal: {
+          Service: 'lambda.amazonaws.com',
+        },
+        Action: 'sts:AssumeRole',
+      },
+    ],
+  }
+
+  // Define the policy document
+  const policy = {
+    Version: '2012-10-17',
+    Statement: [
+      {
+        Effect: 'Allow',
+        Action: ['logs:CreateLogGroup', 'logs:CreateLogStream', 'logs:PutLogEvents'],
+        Resource: 'arn:aws:logs:*:*:*',
+      },
+    ],
+  }
+  try {
+    const data = await iam.send(
+      new CreateRoleCommand({
+        RoleName: roleName,
+        AssumeRolePolicyDocument: JSON.stringify(trustPolicy),
+      })
+    )
+    await iam.send(
+      new PutRolePolicyCommand({
+        PolicyDocument: JSON.stringify(policy),
+        PolicyName: 'LambdaBasicExecution',
+        RoleName: roleName,
+      })
+    )
+    return data?.Role?.Arn
+  } catch (error) {
+    console.log('Error creating IAM role:', error)
+  }
+}
+
 const createFunctionCode = async (client: LambdaClient, inputs: Inputs): Promise<CreateFunctionCommandOutput> => {
-  const params = {
+  const params: CreateFunctionCommandInput = {
     FunctionName: inputs.functionName,
     Code: {
       ImageUri: inputs.imageURI, // set ecr image uri
@@ -95,6 +151,12 @@ const createFunctionCode = async (client: LambdaClient, inputs: Inputs): Promise
     Role: undefined,
     // add more attribute here
   }
+  if (inputs.role) {
+    params.Role = inputs.role
+  } else {
+    params.Role = await createIamRoleLambdaBasic(inputs)
+  }
+
   try {
     return await client.send(new CreateFunctionCommand(params))
   } catch (error) {
