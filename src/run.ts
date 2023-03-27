@@ -165,6 +165,7 @@ const createFunctionCode = async (client: LambdaClient, inputs: Inputs): Promise
     Code: {
       ImageUri: inputs.imageURI, // set ecr image uri
     },
+    PackageType: 'Image',
     Timeout: inputs.timeOut, // Set the timeout
     MemorySize: inputs.memorySize, // Set the memory size
     Role: undefined,
