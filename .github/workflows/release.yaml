@@ -25,4 +25,4 @@ jobs:
       - run: yarn
       - run: yarn build
       - run: yarn package
-      - uses: lampvux/release-typescript-action@main # v1.18.0
+      - uses: lampvux/release-typescript-action@df200daec48520f211713879469e910936bf85b7 # v1.18.0
