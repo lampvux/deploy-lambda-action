@@ -88,7 +88,7 @@ const createFunctionCode = async (client: LambdaClient, inputs: Inputs): Promise
   const params = {
     FunctionName: inputs.functionName,
     Code: {
-      ImageUri: inputs.imageURI,
+      ImageUri: inputs.imageURI, // set ecr image uri
     },
     Timeout: inputs.timeOut, // Set the timeout
     MemorySize: inputs.memorySize, // Set the memory size
