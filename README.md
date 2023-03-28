@@ -1,4 +1,4 @@
-# deploy-lambda-action [![ts](https://github.com/int128/deploy-lambda-action/actions/workflows/ts.yaml/badge.svg)](https://github.com/int128/deploy-lambda-action/actions/workflows/ts.yaml)
+# deploy-lambda-action [![ts](https://github.com/lampvux/deploy-lambda-action/actions/workflows/ts.yaml/badge.svg)](https://github.com/lampvux/deploy-lambda-action/actions/workflows/ts.yaml)
 
 This is an action to deploy a container image to an existing Lambda function.
 
@@ -212,4 +212,3 @@ Either `image-uri` or `zip-path` must be set.
 |------|------------
 | `function-version` | Published version
 | `function-version-arn` | ARN of published version
-| `function-alias-arn` | ARN of alias

@@ -18,14 +18,21 @@ inputs:
     description: Description of function alias (optional)
     required: false
     default: ref=${{ github.ref }},sha=${{ github.sha }}
+  time-out:
+    description: Function timeout in seconds (optional)
+    required: false
+  memory-size:
+    description: Function memory size (optional)
+    required: false
+  role:
+    description: Execution role for the function (optional)
+    required: false
 
 outputs:
   function-version:
     description: Published version
   function-version-arn:
-    description: ARN of published version
-  function-alias-arn:
-    description: ARN of alias
+    description: ARN of published version  
 
 runs:
   using: 'node16'
