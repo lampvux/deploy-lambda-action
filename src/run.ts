@@ -179,7 +179,6 @@ const createFunctionCode = async (client: LambdaClient, inputs: Inputs): Promise
       const role = await isRoleNameExists(inputs.functionName)
       params.Role = role ? role : await createIamRoleLambdaBasic(inputs)
     }
-    core.info(`role: ${JSON.stringify(params)}`)
     return await client.send(new CreateFunctionCommand(params))
   } catch (error) {
     core.info(`Can not create function: ${JSON.stringify(error)}`)
