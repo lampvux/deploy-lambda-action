@@ -169,7 +169,7 @@ const createFunctionCode = async (client: LambdaClient, inputs: Inputs): Promise
     PackageType: 'Image',
     Timeout: inputs.timeOut, // Set the timeout
     MemorySize: inputs.memorySize, // Set the memory size
-    Role: undefined,
+    Role: undefined, // role
     Environment: {
       // Add environment variables
       Variables: JSON.parse(inputs.environmentVariables ?? '{}') as Record<string, string>,
