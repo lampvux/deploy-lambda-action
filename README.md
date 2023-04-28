@@ -203,7 +203,7 @@ data "aws_iam_policy_document" "github_actions_deploy_lambda" {
 | `timeOut` | Lambda timeout (optional)
 | `memorySize` | Lambda memory size (optional)
 | `role` | Execution role (optional)
-| `environmentVariables` | Execution environment variables (optional)
+| `environmentVariables` | Execution environment variables (optional) (a JSON string containing environment variables and its values)
 
 Either `image-uri` or `zip-path` must be set.
 
