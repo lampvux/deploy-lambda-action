@@ -11,6 +11,7 @@ const main = async (): Promise<void> => {
     timeOut: Number(core.getInput('time-out')) || undefined,
     memorySize: Number(core.getInput('memory-size')) || undefined,
     role: core.getInput('role') || undefined,
+    environmentVariables: core.getInput('environmentVariables') || undefined,
   })
   core.setOutput('function-version', outputs.functionVersion)
   core.setOutput('function-version-arn', outputs.functionVersionARN)

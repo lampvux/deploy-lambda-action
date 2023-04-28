@@ -27,6 +27,9 @@ inputs:
   role:
     description: Execution role for the function (optional)
     required: false
+  environmentVariables:
+    description: Custom environment variables (optional)
+    required: false
 
 outputs:
   function-version:
